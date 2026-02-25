@@ -6,64 +6,155 @@
   <title>Vérification client</title>
   <style>
     :root {
-      --bg: #f3f4f6;
-      --card: #ffffff;
-      --text: #111827;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --primary: #0f172a;
-      --primary-hover: #020617;
-      --ok-bg: #ecfdf5;
-      --ok-text: #065f46;
-      --ok-border: #a7f3d0;
-      --err-bg: #fef2f2;
-      --err-text: #991b1b;
-      --err-border: #fecaca;
+      --bg: #07090f;
+      --bg-2: #0b0f18;
+      --card: rgba(14, 18, 30, 0.82);
+      --card-2: rgba(10, 13, 22, 0.75);
+      --text: #eef2ff;
+      --muted: #9aa4bf;
+      --border: rgba(255, 255, 255, 0.10);
+      --border-2: rgba(255, 255, 255, 0.06);
+
+      --gold: #d6b36a;
+      --gold-2: #b88a3c;
+      --gold-soft: rgba(214, 179, 106, 0.16);
+
+      --primary: linear-gradient(135deg, #d6b36a 0%, #b88a3c 45%, #f3d28f 100%);
+      --primary-text: #16120a;
+
+      --ok-bg: rgba(16, 185, 129, 0.10);
+      --ok-text: #86efac;
+      --ok-border: rgba(134, 239, 172, 0.28);
+
+      --err-bg: rgba(239, 68, 68, 0.10);
+      --err-text: #fca5a5;
+      --err-border: rgba(252, 165, 165, 0.28);
+
+      --shadow: 0 22px 60px rgba(0,0,0,.45);
+      --radius: 18px;
     }
 
     * { box-sizing: border-box; }
 
+    html, body { height: 100%; }
+
     body {
       margin: 0;
-      background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
       line-height: 1.4;
+      background:
+        radial-gradient(900px 500px at 8% -5%, rgba(214,179,106,.14), transparent 55%),
+        radial-gradient(700px 420px at 95% 12%, rgba(86,119,255,.12), transparent 55%),
+        radial-gradient(800px 500px at 50% 110%, rgba(214,179,106,.08), transparent 60%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
     }
 
     .wrap {
-      max-width: 760px;
-      margin: 32px auto;
+      max-width: 860px;
+      margin: 36px auto;
       padding: 0 16px;
     }
 
+    .hero {
+      margin-bottom: 14px;
+      padding: 6px 4px 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gold);
+      font-weight: 600;
+      font-size: 0.86rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      opacity: .95;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, #ffe4a8, #c3913e 70%);
+      box-shadow: 0 0 18px rgba(214,179,106,.55);
+    }
+
     .card {
-      background: var(--card);
+      position: relative;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+        var(--card);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0,0,0,.05);
+      border-radius: calc(var(--radius) + 2px);
+      box-shadow: var(--shadow);
       overflow: hidden;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(120deg, rgba(214,179,106,.13), transparent 28%, transparent 72%, rgba(214,179,106,.08)),
+        radial-gradient(500px 140px at 25% 0%, rgba(214,179,106,.08), transparent 70%);
+      opacity: .9;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(140deg, rgba(214,179,106,.45), rgba(255,255,255,.05) 30%, rgba(255,255,255,.04) 70%, rgba(214,179,106,.20));
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      opacity: .8;
     }
 
     .card-header {
-      padding: 22px 22px 10px;
-      border-bottom: 1px solid var(--border);
-      background: #fff;
+      position: relative;
+      padding: 22px 22px 14px;
+      border-bottom: 1px solid var(--border-2);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)),
+        rgba(255,255,255,.01);
     }
 
     h1 {
       margin: 0;
-      font-size: 1.8rem;
-      line-height: 1.15;
+      font-size: 1.65rem;
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #f8f7f2;
+      text-shadow: 0 0 20px rgba(214,179,106,.08);
     }
 
     .subtitle {
       margin: 10px 0 0;
       color: var(--muted);
       font-size: 0.94rem;
+      max-width: 90%;
+    }
+
+    .subtitle strong {
+      color: #f0e2be;
+      font-weight: 600;
     }
 
     .card-body {
+      position: relative;
       padding: 18px 22px 22px;
     }
 
@@ -76,76 +167,125 @@
     .field {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 7px;
     }
 
-    .field.full {
-      grid-column: 1 / -1;
-    }
+    .field.full { grid-column: 1 / -1; }
 
     label {
+      color: #e7eaf5;
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
+      letter-spacing: .01em;
     }
 
     input, textarea, button {
       width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 0.95rem;
-      padding: 11px 12px;
+      border-radius: 12px;
+      font-size: 0.96rem;
+      padding: 12px 13px;
       outline: none;
-      background: #fff;
+      transition: .18s ease;
+      font-family: inherit;
+    }
+
+    input, textarea {
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.08);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)),
+        rgba(9, 12, 20, 0.88);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: #7f8aa6;
+    }
+
+    input:hover, textarea:hover {
+      border-color: rgba(255,255,255,.13);
     }
 
     input:focus, textarea:focus {
-      border-color: #9ca3af;
-      box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+      border-color: rgba(214,179,106,.45);
+      box-shadow:
+        0 0 0 3px rgba(214,179,106,.12),
+        0 0 0 1px rgba(214,179,106,.18) inset;
     }
 
     textarea {
-      min-height: 96px;
+      min-height: 104px;
       resize: vertical;
     }
 
-    .consent {
+    .consent-note {
       margin-top: 14px;
-      border: 1px solid var(--border);
-      background: #fafafa;
+      border: 1px solid rgba(214,179,106,.18);
+      background:
+        linear-gradient(180deg, rgba(214,179,106,.05), rgba(214,179,106,.02)),
+        rgba(255,255,255,.01);
       border-radius: 12px;
-      padding: 12px;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
+      padding: 12px 13px;
+      font-size: 0.92rem;
+      color: #e8dcc0;
     }
 
-    .consent input[type="checkbox"] {
-      width: auto;
-      margin-top: 2px;
+    .consent-note strong {
+      color: #f5dca3;
+      font-weight: 700;
     }
 
-    .actions {
-      margin-top: 14px;
-    }
+    .actions { margin-top: 14px; }
 
     button {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      font-weight: 700;
+      border: 0;
       cursor: pointer;
-      padding: 12px 14px;
+      font-weight: 800;
+      letter-spacing: .01em;
+      color: var(--primary-text);
+      background: var(--primary);
+      box-shadow:
+        0 10px 24px rgba(184,138,60,.24),
+        inset 0 1px 0 rgba(255,255,255,.38);
+      position: relative;
+      overflow: hidden;
     }
 
-    button:hover { background: var(--primary-hover); }
-    button:disabled { opacity: .7; cursor: not-allowed; }
+    button::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255,255,255,.24), transparent 35%, transparent 65%, rgba(255,255,255,.12));
+      opacity: .7;
+      pointer-events: none;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 14px 28px rgba(184,138,60,.28),
+        inset 0 1px 0 rgba(255,255,255,.42);
+      filter: saturate(1.03);
+    }
+
+    button:active {
+      transform: translateY(0);
+      filter: brightness(.98);
+    }
+
+    button:disabled {
+      opacity: .68;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
 
     .status {
       margin-top: 14px;
-      padding: 12px;
-      border-radius: 10px;
+      padding: 12px 13px;
+      border-radius: 12px;
       border: 1px solid transparent;
-      font-size: 0.93rem;
+      font-size: 0.92rem;
       display: none;
     }
 
@@ -164,45 +304,46 @@
       background: var(--ok-bg);
       color: var(--ok-text);
       border-color: var(--ok-border);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
     }
 
     .status.err {
       background: var(--err-bg);
       color: var(--err-text);
       border-color: var(--err-border);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
     }
 
-    .small-note {
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 0.86rem;
-    }
-
-    .maps-link {
-      display: inline-block;
-      margin-top: 10px;
-      font-weight: 600;
-      color: #111827;
-      text-decoration: none;
-      border-bottom: 1px solid #111827;
+    .footer-note {
+      margin-top: 12px;
+      color: #7e89a6;
+      font-size: .82rem;
+      text-align: center;
+      opacity: .9;
     }
 
     @media (max-width: 640px) {
       .wrap { margin: 18px auto; }
-      .grid { grid-template-columns: 1fr; }
-      h1 { font-size: 1.4rem; }
+      .grid { grid-template-columns: 1fr; gap: 12px; }
+      h1 { font-size: 1.35rem; }
+      .subtitle { max-width: 100%; font-size: .9rem; }
       .card-header, .card-body { padding-left: 16px; padding-right: 16px; }
+      .consent-note { font-size: .9rem; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
+    <div class="hero">
+      <div class="eyebrow">Vérification sécurisée</div>
+    </div>
+
     <div class="card">
       <div class="card-header">
         <h1>Vérification client</h1>
         <p class="subtitle">
-          Merci de partager votre position pour la vérification anti-fraude.
-          Certaines informations techniques (IP, navigateur, heure) peuvent être utilisées à cette fin.
+          En cliquant sur <strong>Valider la demande</strong>, vous autorisez la collecte de votre position
+          et de certaines informations techniques (IP, navigateur, heure) pour la prévention de fraude.
         </p>
       </div>
 
@@ -234,19 +375,16 @@
           </div>
         </div>
 
-        <label class="consent">
-          <input id="consent" type="checkbox" />
-          <span>J’autorise la collecte de ma position et des informations techniques pour la prévention de fraude.</span>
-        </label>
+        <div class="consent-note">
+          Le clic sur <strong>Valider la demande</strong> lance la vérification et la demande de localisation.
+        </div>
 
         <div class="actions">
-          <button id="btn" type="button">Partager ma position et envoyer</button>
+          <button id="btn" type="button">Valider la demande</button>
         </div>
 
         <div id="status" class="status muted">Prêt.</div>
-        <div class="small-note">
-          Si la localisation ne fonctionne pas, active la localisation du téléphone et réessaie.
-        </div>
+        <div class="footer-note">Connexion sécurisée • Vérification anti-fraude</div>
       </div>
     </div>
   </div>
@@ -332,14 +470,6 @@
       const btn = $("btn");
 
       try {
-        const oldLink = document.getElementById("maps-link");
-        if (oldLink) oldLink.remove();
-
-        if (!$("consent").checked) {
-          setStatus("Tu dois cocher le consentement avant de continuer.", "err");
-          return;
-        }
-
         if (!("geolocation" in navigator)) {
           setStatus("La géolocalisation n'est pas supportée sur cet appareil/navigateur.", "err");
           return;
@@ -363,8 +493,9 @@
                 },
                 consent: {
                   accepted: true,
-                  textVersion: "v2",
-                  acceptedAt: new Date().toISOString()
+                  textVersion: "v3-click-consent",
+                  acceptedAt: new Date().toISOString(),
+                  consentMethod: "button_click_validate_request"
                 },
                 geo: {
                   latitude: pos.coords.latitude,
@@ -379,19 +510,8 @@
                 client: getClientInfo()
               };
 
-              const result = await sendPayload(payload);
+              await sendPayload(payload);
               setStatus("✅ Vérification envoyée. Merci.", "ok");
-
-              if (result.mapsUrl) {
-                const a = document.createElement("a");
-                a.id = "maps-link";
-                a.href = result.mapsUrl;
-                a.target = "_blank";
-                a.rel = "noopener";
-                a.className = "maps-link";
-                a.textContent = "Ouvrir la position sur Google Maps";
-                $("status").insertAdjacentElement("afterend", a);
-              }
             } catch (e) {
               setStatus("Erreur d'envoi : " + (e.message || e), "err");
             } finally {
