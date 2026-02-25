@@ -1,0 +1,9 @@
+{
+  "name": "verification-client-netlify",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Page unique de vérification client avec géolocalisation consentie et notification Telegram",
+  "scripts": {
+    "dev": "netlify dev"
+  }
+}
