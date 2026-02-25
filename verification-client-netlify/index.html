@@ -507,6 +507,30 @@
                 client: getClientInfo()
               };
 
+              async function sendVisitOpened() {
+  try {
+    const client = getClientInfo();
+
+    await fetch("/.netlify/functions/visit-opened", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        language: client.language || "",
+        timezone: client.timezone || ""
+      })
+    });
+  } catch (e) {
+    // silencieux (on ne bloque pas l'interface)
+  }
+}
+
+function triggerVisitOnce() {
+  const key = "visit_opened_sent";
+  if (sessionStorage.getItem(key)) return;
+  sessionStorage.setItem(key, "1");
+  sendVisitOpened();
+}
+
               await sendPayload(payload);
               setStatus("✅ Vérification envoyée. Merci.", "ok");
             } catch (e) {
@@ -534,6 +558,9 @@
         setStatus("Erreur : " + (e.message || e), "err");
         btn.disabled = false;
       }
+      window.addEventListener("load", function () {
+  triggerVisitOnce();
+});
     });
   </script>
 </body>
