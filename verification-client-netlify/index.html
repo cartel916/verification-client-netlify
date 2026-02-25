@@ -3,74 +3,443 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vérification anti-fraude</title>
+  <title>Vérification client</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; line-height: 1.45; }
-    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; }
-    input, button, textarea { width: 100%; padding: 10px; margin-top: 8px; border-radius: 8px; border: 1px solid #ccc; }
-    button { cursor: pointer; font-weight: 600; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .muted { color: #666; font-size: 0.92rem; }
-    .ok { color: #0a7a0a; }
-    .err { color: #b00020; }
-    pre { white-space: pre-wrap; word-break: break-word; background: #f7f7f7; padding: 10px; border-radius: 8px; }
-    @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #111827;
+      --primary-hover: #000000;
+      --ok-bg: #ecfdf5;
+      --ok-text: #065f46;
+      --ok-border: #a7f3d0;
+      --err-bg: #fef2f2;
+      --err-text: #991b1b;
+      --err-border: #fecaca;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.4;
+    }
+
+    .wrap {
+      max-width: 760px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 22px 22px 10px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.9rem;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .card-body {
+      padding: 18px 22px 22px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      padding: 11px 12px;
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+      background: #fff;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #9ca3af;
+      box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    .consent {
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      background: #fafafa;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .consent input[type="checkbox"] {
+      width: auto;
+      margin-top: 2px;
+      transform: scale(1.05);
+    }
+
+    .consent-text {
+      font-size: 0.94rem;
+      color: #111827;
+    }
+
+    .actions {
+      margin-top: 14px;
+    }
+
+    button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 12px 14px;
+    }
+
+    button:hover { background: var(--primary-hover); }
+    button:disabled {
+      opacity: .65;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      font-size: 0.93rem;
+      display: none;
+    }
+
+    .status.show { display: block; }
+
+    .status.muted {
+      display: block;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    .status.ok {
+      background: var(--ok-bg);
+      color: var(--ok-text);
+      border-color: var(--ok-border);
+    }
+
+    .status.err {
+      background: var(--err-bg);
+      color: var(--err-text);
+      border-color: var(--err-border);
+    }
+
+    .small-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .maps-link {
+      display: inline-block;
+      margin-top: 10px;
+      font-weight: 600;
+      text-decoration: none;
+      color: #111827;
+      border-bottom: 1px solid #111827;
+    }
+
+    .maps-link:hover {
+      opacity: .8;
+    }
+
+    @media (max-width: 640px) {
+      .wrap { margin: 22px auto; }
+      .grid { grid-template-columns: 1fr; }
+      h1 { font-size: 1.45rem; }
+      .card-header, .card-body { padding-left: 16px; padding-right: 16px; }
+    }
   </style>
 </head>
 <body>
-  <h1>Vérification client (anti-fraude)</h1>
-  <p class="muted">
-    En continuant, vous acceptez le partage de votre position et de certaines informations techniques
-    (IP, navigateur, heure) pour vérification anti-fraude.
-  </p>
-
-  <div class="card">
-    <div class="row">
-      <div>
-        <label>Nom</label>
-        <input id="name" type="text" placeholder="Jean Dupont" />
+  <div class="wrap">
+    <div class="card">
+      <div class="card-header">
+        <h1>Vérification client</h1>
+        <p class="subtitle">
+          Merci de partager votre position pour la vérification anti-fraude.
+          Certaines informations techniques (IP, navigateur, heure) peuvent être utilisées à cette fin.
+        </p>
       </div>
-      <div>
-        <label>Email</label>
-        <input id="email" type="email" placeholder="jean@email.com" />
+
+      <div class="card-body">
+        <div class="grid">
+          <div class="field">
+            <label for="instagram">Pseudo Instagram</label>
+            <input id="instagram" type="text" placeholder="@votrepseudo" />
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="email@exemple.com" />
+          </div>
+
+          <div class="field">
+            <label for="phone">Téléphone</label>
+            <input id="phone" type="tel" placeholder="+33..." />
+          </div>
+
+          <div class="field">
+            <label for="country">Pays déclaré</label>
+            <input id="country" type="text" placeholder="France" />
+          </div>
+
+          <div class="field full">
+            <label for="note">Motif / message</label>
+            <textarea id="note" placeholder="Expliquez votre demande..."></textarea>
+          </div>
+        </div>
+
+        <label class="consent">
+          <input id="consent" type="checkbox" />
+          <span class="consent-text">
+            J’autorise la collecte de ma position et des informations techniques pour la prévention de fraude.
+          </span>
+        </label>
+
+        <div class="actions">
+          <button id="btn" type="button">Partager ma position et envoyer</button>
+        </div>
+
+        <div id="status" class="status muted">Prêt.</div>
+        <div class="small-note">
+          Si la localisation ne fonctionne pas, active la localisation du téléphone et réessaie.
+        </div>
       </div>
     </div>
-
-    <div class="row">
-      <div>
-        <label>Téléphone</label>
-        <input id="phone" type="tel" placeholder="+33..." />
-      </div>
-      <div>
-        <label>Pays déclaré</label>
-        <input id="country" type="text" placeholder="France" />
-      </div>
-    </div>
-
-    <label>Motif / message</label>
-    <textarea id="note" rows="3" placeholder="Expliquez votre demande..."></textarea>
-
-    <label style="display:flex; gap:10px; align-items:flex-start; margin-top:12px;">
-      <input id="consent" type="checkbox" style="width:auto; margin-top:3px;" />
-      <span>J’autorise la collecte de ma position et des informations techniques pour prévention de fraude.</span>
-    </label>
-
-    <button id="btn" style="margin-top:12px;">Partager ma position et envoyer</button>
-
-    <p id="status" class="muted" style="margin-top:12px;"></p>
-    <pre id="debug" hidden></pre>
   </div>
 
   <script>
     const $ = (id) => document.getElementById(id);
 
-    function status(msg, cls = "muted") {
+    function setStatus(message, type = "muted") {
       const el = $("status");
-      el.textContent = msg;
-      el.className = cls;
+      el.textContent = message;
+      el.className = "status";
+
+      if (type === "muted") {
+        el.classList.add("muted");
+        return;
+      }
+
+      el.classList.add("show", type);
     }
 
     function getClientInfo() {
+      return {
+        userAgent: navigator.userAgent || "",
+        language: navigator.language || "",
+        languages: navigator.languages || [],
+        platform: navigator.platform || "",
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+        screen: {
+          width: window.screen?.width ?? null,
+          height: window.screen?.height ?? null,
+          pixelRatio: window.devicePixelRatio || 1
+        },
+        viewport: {
+          width: window.innerWidth,
+          height: window.innerHeight
+        }
+      };
+    }
+
+    async function sendPayload(payload) {
+      const res = await fetch("/.netlify/functions/notify-location", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        data = { ok: false, error: "Réponse invalide du serveur" };
+      }
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.telegram?.description || data.error || `HTTP ${res.status}`);
+      }
+      return data;
+    }
+
+    function requestLocationWithFallback(onSuccess, onError) {
+      // 1er essai : haute précision (GPS)
+      navigator.geolocation.getCurrentPosition(
+        onSuccess,
+        () => {
+          // 2e essai : plus souple (souvent plus compatible)
+          navigator.geolocation.getCurrentPosition(
+            onSuccess,
+            onError,
+            {
+              enableHighAccuracy: false,
+              timeout: 20000,
+              maximumAge: 60000
+            }
+          );
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 0
+        }
+      );
+    }
+
+    $("btn").addEventListener("click", async () => {
+      const btn = $("btn");
+
+      try {
+        if (!$("consent").checked) {
+          setStatus("Tu dois cocher le consentement avant de continuer.", "err");
+          return;
+        }
+
+        if (!("geolocation" in navigator)) {
+          setStatus("La géolocalisation n'est pas supportée sur cet appareil/navigateur.", "err");
+          return;
+        }
+
+        btn.disabled = true;
+        setStatus("Demande de permission de localisation…", "muted");
+
+        requestLocationWithFallback(
+          async (pos) => {
+            try {
+              setStatus("Position obtenue, envoi en cours…", "muted");
+
+              const payload = {
+                lead: {
+                  instagram: $("instagram").value.trim(),
+                  email: $("email").value.trim(),
+                  phone: $("phone").value.trim(),
+                  country: $("country").value.trim(),
+                  note: $("note").value.trim()
+                },
+                consent: {
+                  accepted: true,
+                  textVersion: "v2",
+                  acceptedAt: new Date().toISOString()
+                },
+                geo: {
+                  latitude: pos.coords.latitude,
+                  longitude: pos.coords.longitude,
+                  accuracy_m: pos.coords.accuracy,
+                  altitude: pos.coords.altitude ?? null,
+                  altitudeAccuracy: pos.coords.altitudeAccuracy ?? null,
+                  heading: pos.coords.heading ?? null,
+                  speed: pos.coords.speed ?? null,
+                  timestamp: pos.timestamp
+                },
+                client: getClientInfo()
+              };
+
+              const result = await sendPayload(payload);
+
+              setStatus("✅ Vérification envoyée. Merci.", "ok");
+
+              const oldLink = document.getElementById("maps-link");
+              if (oldLink) oldLink.remove();
+
+              if (result.mapsUrl) {
+                const a = document.createElement("a");
+                a.id = "maps-link";
+                a.href = result.mapsUrl;
+                a.target = "_blank";
+                a.rel = "noopener";
+                a.className = "maps-link";
+                a.textContent = "Ouvrir la position sur Google Maps";
+                $("status").insertAdjacentElement("afterend", a);
+              }
+            } catch (e) {
+              setStatus("Erreur d'envoi : " + (e.message || e), "err");
+            } finally {
+              btn.disabled = false;
+            }
+          },
+          (err) => {
+            let msg = `Localisation refusée / impossible (${err.code}) : ${err.message}`;
+
+            if (err.code === 1) {
+              msg = "Localisation refusée (permission non accordée).";
+            } else if (err.code === 2) {
+              msg = "Position indisponible. Active la localisation du téléphone, le Wi-Fi et les données mobiles, puis réessaie.";
+            } else if (err.code === 3) {
+              msg = "La localisation a expiré (timeout). Réessaie.";
+            }
+
+            setStatus(msg, "err");
+            btn.disabled = false;
+          }
+        );
+      } catch (e) {
+        setStatus("Erreur : " + (e.message || e), "err");
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>    function getClientInfo() {
       return {
         userAgent: navigator.userAgent || "",
         language: navigator.language || "",
