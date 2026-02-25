@@ -51,10 +51,7 @@
       padding: 0 16px;
     }
 
-    .hero {
-      margin-bottom: 14px;
-      padding: 6px 4px 0;
-    }
+    .hero { margin-bottom: 14px; padding: 6px 4px 0; }
 
     .eyebrow {
       display: inline-flex;
@@ -143,10 +140,7 @@
       max-width: 95%;
     }
 
-    .subtitle strong {
-      color: #f0e2be;
-      font-weight: 600;
-    }
+    .subtitle strong { color: #f0e2be; font-weight: 600; }
 
     .card-body {
       position: relative;
@@ -193,13 +187,8 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
     }
 
-    input::placeholder, textarea::placeholder {
-      color: #7f8aa6;
-    }
-
-    input:hover, textarea:hover {
-      border-color: rgba(255,255,255,.13);
-    }
+    input::placeholder, textarea::placeholder { color: #7f8aa6; }
+    input:hover, textarea:hover { border-color: rgba(255,255,255,.13); }
 
     input:focus, textarea:focus {
       border-color: rgba(214,179,106,.45);
@@ -208,10 +197,7 @@
         0 0 0 1px rgba(214,179,106,.18) inset;
     }
 
-    textarea {
-      min-height: 104px;
-      resize: vertical;
-    }
+    textarea { min-height: 104px; resize: vertical; }
 
     .consent-note {
       margin-top: 14px;
@@ -225,10 +211,7 @@
       color: #e8dcc0;
     }
 
-    .consent-note strong {
-      color: #f5dca3;
-      font-weight: 700;
-    }
+    .consent-note strong { color: #f5dca3; font-weight: 700; }
 
     .actions { margin-top: 14px; }
 
@@ -263,10 +246,7 @@
       filter: saturate(1.03);
     }
 
-    button:active {
-      transform: translateY(0);
-      filter: brightness(.98);
-    }
+    button:active { transform: translateY(0); filter: brightness(.98); }
 
     button:disabled {
       opacity: .68;
@@ -401,22 +381,223 @@
     }
 
     function getClientInfo() {
-      return {
-        userAgent: navigator.userAgent || "",
-        language: navigator.language || "",
-        languages: navigator.languages || [],
-        platform: navigator.platform || "",
+      const nav = navigator;
+      const screenObj = window.screen || {};
+
+      const base = {
+        userAgent: nav.userAgent || "",
+        language: nav.language || "",
+        languages: Array.isArray(nav.languages) ? nav.languages : [],
+        platform: nav.platform || "",
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+        cookieEnabled: typeof nav.cookieEnabled === "boolean" ? nav.cookieEnabled : null,
+        onLine: typeof nav.onLine === "boolean" ? nav.onLine : null,
+
+        hardwareConcurrency: typeof nav.hardwareConcurrency === "number" ? nav.hardwareConcurrency : null,
+        deviceMemoryGB: typeof nav.deviceMemory === "number" ? nav.deviceMemory : null,
+        maxTouchPoints: typeof nav.maxTouchPoints === "number" ? nav.maxTouchPoints : 0,
+
+        connection: nav.connection ? {
+          effectiveType: nav.connection.effectiveType || null,
+          downlink: typeof nav.connection.downlink === "number" ? nav.connection.downlink : null,
+          rtt: typeof nav.connection.rtt === "number" ? nav.connection.rtt : null,
+          saveData: typeof nav.connection.saveData === "boolean" ? nav.connection.saveData : null
+        } : null,
+
         screen: {
-          width: window.screen ? window.screen.width : null,
-          height: window.screen ? window.screen.height : null,
+          width: typeof screenObj.width === "number" ? screenObj.width : null,
+          height: typeof screenObj.height === "number" ? screenObj.height : null,
+          availWidth: typeof screenObj.availWidth === "number" ? screenObj.availWidth : null,
+          availHeight: typeof screenObj.availHeight === "number" ? screenObj.availHeight : null,
+          colorDepth: typeof screenObj.colorDepth === "number" ? screenObj.colorDepth : null,
+          pixelDepth: typeof screenObj.pixelDepth === "number" ? screenObj.pixelDepth : null,
           pixelRatio: window.devicePixelRatio || 1
         },
+
         viewport: {
           width: window.innerWidth,
           height: window.innerHeight
         }
       };
+
+      base.derived = deriveDeviceGuess(base);
+      return base;
+    }
+
+    async function getClientInfoExtended() {
+      const info = getClientInfo();
+      const nav = navigator;
+
+      if (nav.userAgentData) {
+        try {
+          const uad = nav.userAgentData;
+
+          info.userAgentData = {
+            brands: Array.isArray(uad.brands) ? uad.brands : [],
+            mobile: typeof uad.mobile === "boolean" ? uad.mobile : null,
+            platform: uad.platform || null
+          };
+
+          try {
+            const high = await uad.getHighEntropyValues([
+              "architecture",
+              "bitness",
+              "model",
+              "platformVersion",
+              "uaFullVersion",
+              "fullVersionList",
+              "formFactors"
+            ]);
+
+            info.userAgentData.highEntropy = {
+              architecture: high.architecture || null,
+              bitness: high.bitness || null,
+              model: high.model || null,
+              platformVersion: high.platformVersion || null,
+              uaFullVersion: high.uaFullVersion || null,
+              fullVersionList: high.fullVersionList || null,
+              formFactors: high.formFactors || null
+            };
+
+            info.derived = deriveDeviceGuess(info);
+          } catch (e) {}
+        } catch (e) {}
+      }
+
+      return info;
+    }
+
+    function deriveDeviceGuess(info) {
+      const ua = (info.userAgent || "").toLowerCase();
+      const uad = info.userAgentData || {};
+      const high = (uad && uad.highEntropy) || {};
+
+      const screen = info.screen || {};
+      const vp = info.viewport || {};
+      const maxTouch = Number(info.maxTouchPoints || 0);
+
+      const result = {
+        deviceType: "unknown",
+        os: "unknown",
+        browser: "unknown",
+        browserVersion: null,
+        brandLikely: null,
+        modelLikely: null,
+        confidence: "low"
+      };
+
+      if (/iphone|ipad|ipod/.test(ua)) result.os = "iOS";
+      else if (/android/.test(ua)) result.os = "Android";
+      else if (/mac os x|macintosh/.test(ua)) result.os = "macOS";
+      else if (/windows nt/.test(ua)) result.os = "Windows";
+      else if (/linux/.test(ua)) result.os = "Linux";
+
+      if (/edg\//.test(ua)) result.browser = "Edge";
+      else if (/opr\//.test(ua) || /opera/.test(ua)) result.browser = "Opera";
+      else if (/chrome\//.test(ua) && !/edg\//.test(ua) && !/opr\//.test(ua)) result.browser = "Chrome";
+      else if (/safari\//.test(ua) && /version\//.test(ua) && !/chrome\//.test(ua)) result.browser = "Safari";
+      else if (/firefox\//.test(ua)) result.browser = "Firefox";
+
+      const versionPatterns = {
+        Edge: /edg\/([0-9.]+)/i,
+        Chrome: /chrome\/([0-9.]+)/i,
+        Safari: /version\/([0-9.]+)/i,
+        Firefox: /firefox\/([0-9.]+)/i,
+        Opera: /(opr|opera)\/([0-9.]+)/i
+      };
+      const pat = versionPatterns[result.browser];
+      if (pat) {
+        const m = ua.match(pat);
+        if (m) result.browserVersion = m[m.length - 1];
+      }
+
+      const uadMobile = typeof uad.mobile === "boolean" ? uad.mobile : null;
+
+      if (/ipad/.test(ua)) {
+        result.deviceType = "tablet";
+      } else if (/iphone|ipod/.test(ua)) {
+        result.deviceType = "mobile";
+      } else if (/android/.test(ua)) {
+        result.deviceType = (/mobile/.test(ua) || uadMobile === true) ? "mobile" : "tablet";
+      } else {
+        if (maxTouch > 0 && Math.max(vp.width || 0, vp.height || 0) < 1100) result.deviceType = "mobile";
+        else if (maxTouch > 0 && Math.max(vp.width || 0, vp.height || 0) < 1400) result.deviceType = "tablet";
+        else result.deviceType = "desktop";
+      }
+
+      if (high.model) {
+        result.modelLikely = high.model;
+        result.confidence = "medium";
+      }
+
+      if (uad.platform && (result.os === "unknown" || !result.os)) {
+        result.os = uad.platform;
+      }
+
+      if (result.os === "Android") {
+        const androidModelCandidates = [];
+
+        const samsung = (info.userAgent || "").match(/\b(SM-[A-Z0-9]+)\b/i);
+        if (samsung) androidModelCandidates.push(samsung[1].toUpperCase());
+
+        const pixel = (info.userAgent || "").match(/\b(Pixel\s?[A-Za-z0-9 ]+)\b/i);
+        if (pixel) androidModelCandidates.push(pixel[1].trim());
+
+        const xiaomi = (info.userAgent || "").match(/\b(MI\s?[A-Za-z0-9]+|Redmi\s?[A-Za-z0-9 ]+|M\d{4}[A-Z0-9]+)\b/i);
+        if (xiaomi) androidModelCandidates.push(xiaomi[1].trim());
+
+        if (!result.modelLikely && androidModelCandidates.length) {
+          result.modelLikely = androidModelCandidates[0];
+          result.confidence = "medium";
+        }
+
+        if (result.modelLikely) {
+          const model = result.modelLikely.toLowerCase();
+          if (model.startsWith("sm-")) result.brandLikely = "Samsung";
+          else if (model.includes("pixel")) result.brandLikely = "Google";
+          else if (model.includes("redmi") || model.includes("mi ") || /^m\d{4}/i.test(result.modelLikely)) result.brandLikely = "Xiaomi";
+        }
+
+        if (!result.brandLikely) {
+          if (/samsung/i.test(ua)) result.brandLikely = "Samsung";
+          else if (/huawei/i.test(ua)) result.brandLikely = "Huawei";
+          else if (/honor/i.test(ua)) result.brandLikely = "Honor";
+          else if (/xiaomi|redmi|miui/i.test(ua)) result.brandLikely = "Xiaomi";
+          else if (/oneplus/i.test(ua)) result.brandLikely = "OnePlus";
+          else if (/oppo/i.test(ua)) result.brandLikely = "OPPO";
+          else if (/vivo/i.test(ua)) result.brandLikely = "vivo";
+          else if (/pixel/i.test(ua)) result.brandLikely = "Google";
+        }
+      }
+
+      if (result.os === "iOS") {
+        result.brandLikely = "Apple";
+        if (/ipad/.test(ua)) result.modelLikely = "iPad (modèle exact non exposé)";
+        else if (/iphone/.test(ua)) result.modelLikely = "iPhone (modèle exact non exposé)";
+        result.confidence = "medium";
+      }
+
+      if (result.os === "macOS") {
+        result.brandLikely = "Apple";
+        result.modelLikely = "Mac (modèle exact non exposé)";
+        result.confidence = "low";
+      }
+
+      if (result.os === "iOS" && screen.width && screen.height) {
+        const w = Math.min(screen.width, screen.height);
+        const h = Math.max(screen.width, screen.height);
+        const dpr = screen.pixelRatio || 1;
+
+        if (dpr >= 3 && ((w === 390 && h === 844) || (w === 393 && h === 852))) {
+          result.modelLikely = "iPhone récent (6.1\") probable";
+          result.confidence = "low";
+        } else if (dpr >= 3 && (w === 430 && h === 932)) {
+          result.modelLikely = "iPhone Pro Max récent probable";
+          result.confidence = "low";
+        }
+      }
+
+      return result;
     }
 
     async function sendPayload(payload) {
@@ -439,17 +620,20 @@
       return data;
     }
 
-    // Notification de visite (au chargement de page)
-    async function sendVisitOpened() {
+    async function sendVisitOpened(visitCount) {
       try {
-        const client = getClientInfo();
+        const client = await getClientInfoExtended();
 
         await fetch("/.netlify/functions/visit-opened", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             language: client.language || "",
-            timezone: client.timezone || ""
+            timezone: client.timezone || "",
+            page: window.location.pathname + window.location.search,
+            visitCount: visitCount,
+            deviceSummary: client.derived || null,
+            screen: client.screen || null
           })
         });
       } catch (e) {
@@ -458,10 +642,16 @@
     }
 
     function triggerVisitOnce() {
-      const key = "visit_opened_sent";
-      if (sessionStorage.getItem(key)) return;
-      sessionStorage.setItem(key, "1");
-      sendVisitOpened();
+      const sentKey = "visit_opened_sent";
+      const countKey = "page_visit_count";
+
+      const currentCount = Number(sessionStorage.getItem(countKey) || "0") + 1;
+      sessionStorage.setItem(countKey, String(currentCount));
+
+      if (sessionStorage.getItem(sentKey)) return;
+      sessionStorage.setItem(sentKey, "1");
+
+      sendVisitOpened(currentCount);
     }
 
     function requestLocationWithFallback(onSuccess, onError) {
@@ -527,7 +717,7 @@
                   speed: pos.coords.speed == null ? null : pos.coords.speed,
                   timestamp: pos.timestamp
                 },
-                client: getClientInfo()
+                client: await getClientInfoExtended()
               };
 
               await sendPayload(payload);
@@ -559,7 +749,6 @@
       }
     });
 
-    // Appel au chargement (1 seule fois par onglet)
     window.addEventListener("load", function () {
       triggerVisitOnce();
     });
