@@ -207,7 +207,6 @@
         <h1>Vérification</h1>
         <p class="subtitle">
           En cliquant sur <strong>Valider la demande</strong>, vous envoyez vos informations.
-          La localisation GPS est facultative.
         </p>
       </div>
 
@@ -240,7 +239,7 @@
         </div>
 
         <div class="consent-note">
-          Le clic sur <strong>Valider la demande</strong> envoie votre demande. Si vous refusez la localisation, la demande est quand même envoyée sans GPS.
+          Le clic sur <strong>Valider la demande</strong> envoie votre demande.
         </div>
 
         <div class="actions">
@@ -513,7 +512,7 @@
 
       async function submitWithoutGeo(reasonCode, reasonMessage) {
         try {
-          setStatus("Envoi de la demande (sans localisation GPS)…", "muted");
+          setStatus("Envoi de la demande …", "muted");
 
           const payload = {
             lead: {
@@ -537,7 +536,7 @@
           };
 
           await sendPayload(payload);
-          setStatus("✅ Demande envoyée (sans localisation GPS).", "ok");
+          setStatus("✅ Demande envoyée.", "ok");
         } catch (e) {
           setStatus("Erreur d'envoi : " + (e.message || e), "err");
         } finally {
