@@ -12,12 +12,7 @@ exports.handler = async (event) => {
       return json(500, { ok: false, error: "Variables Telegram manquantes" });
     }
 
-    const headers = event.headers || {};
-    const xff = headers["x-forwarded-for"] || headers["X-Forwarded-For"] || "";
-    const ip = xff.split(",")[0].trim() || headers["client-ip"] || headers["Client-Ip"] || "inconnue";
-    const userAgent = headers["user-agent"] || headers["User-Agent"] || "inconnu";
-    const referer = headers["referer"] || headers["Referer"] || "—";
-
+    // Parse body (envoyé par le front)
     let body = {};
     try {
       body = JSON.parse(event.body || "{}");
@@ -25,47 +20,85 @@ exports.handler = async (event) => {
       body = {};
     }
 
-    // Géolocalisation IP (approx) - optionnelle
-    let ipGeo = null;
+    const headers = event.headers || {};
+
+    // IP côté serveur (Netlify -> x-forwarded-for)
+    const xff =
+      headers["x-forwarded-for"] ||
+      headers["X-Forwarded-For"] ||
+      "";
+
+    const ip =
+      (xff && xff.split(",")[0].trim()) ||
+      headers["client-ip"] ||
+      headers["Client-Ip"] ||
+      "inconnue";
+
+    const userAgent =
+      headers["user-agent"] ||
+      headers["User-Agent"] ||
+      "inconnu";
+
+    const referer =
+      headers["referer"] ||
+      headers["Referer"] ||
+      "—";
+
+    const language = body.language || "—";
+    const timezone = body.timezone || "—";
+    const timestamp = new Date().toISOString();
+
+    // Géolocalisation IP approx (optionnelle via ipinfo)
+    let ipGeo = {
+      city: null,
+      region: null,
+      country: null,
+      org: null,
+      loc: null
+    };
+
     if (IPINFO_TOKEN && ip && ip !== "inconnue") {
       try {
-        const r = await fetch(`https://ipinfo.io/${ip}?token=${IPINFO_TOKEN}`);
-        const d = await r.json();
-        if (r.ok && !d.error) {
+        const ipinfoRes = await fetch(`https://ipinfo.io/${encodeURIComponent(ip)}?token=${encodeURIComponent(IPINFO_TOKEN)}`);
+        const ipinfoData = await ipinfoRes.json();
+
+        if (ipinfoRes.ok && !ipinfoData.error) {
           ipGeo = {
-            city: d.city || null,
-            region: d.region || null,
-            country: d.country || null,
-            org: d.org || null,
-            loc: d.loc || null // "lat,lon" approx IP
+            city: ipinfoData.city || null,
+            region: ipinfoData.region || null,
+            country: ipinfoData.country || null,
+            org: ipinfoData.org || null,
+            loc: ipinfoData.loc || null // "lat,lon" approx IP
           };
         }
       } catch (e) {
-        // ignore erreur API IP
+        // silencieux (on garde juste IP brute)
       }
     }
 
     const text = [
       "👀 *Visite détectée*",
       "",
-      `• Heure: ${new Date().toISOString()}`,
+      `• Heure: ${safe(timestamp)}`,
       `• IP: ${safe(ip)}`,
       `• User-Agent: ${safe(userAgent)}`,
       `• Referrer: ${safe(referer)}`,
-      `• Langue (client): ${safe(body.language)}`,
-      `• Timezone (client): ${safe(body.timezone)}`,
+      `• Langue (client): ${safe(language)}`,
+      `• Timezone (client): ${safe(timezone)}`,
       "",
       "*Position IP (approx)*",
-      `• Ville: ${safe(ipGeo?.city)}`,
-      `• Région: ${safe(ipGeo?.region)}`,
-      `• Pays: ${safe(ipGeo?.country)}`,
-      `• FAI/ASN: ${safe(ipGeo?.org)}`,
-      `• Loc approx: ${safe(ipGeo?.loc)}`
-    ].join("\\n");
+      `• Ville: ${safe(ipGeo.city)}`,
+      `• Région: ${safe(ipGeo.region)}`,
+      `• Pays: ${safe(ipGeo.country)}`,
+      `• FAI/ASN: ${safe(ipGeo.org)}`,
+      `• Loc approx: ${safe(ipGeo.loc)}`
+    ].join("\n");
 
     const tgRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         chat_id: TELEGRAM_CHAT_ID,
         text,
@@ -75,13 +108,21 @@ exports.handler = async (event) => {
     });
 
     const tgData = await tgRes.json();
+
     if (!tgRes.ok || !tgData.ok) {
-      return json(502, { ok: false, error: "Erreur Telegram", telegram: tgData });
+      return json(502, {
+        ok: false,
+        error: "Erreur Telegram",
+        telegram: tgData
+      });
     }
 
     return json(200, { ok: true });
   } catch (e) {
-    return json(500, { ok: false, error: e.message || "Erreur serveur" });
+    return json(500, {
+      ok: false,
+      error: e && e.message ? e.message : "Erreur serveur"
+    });
   }
 };
 
@@ -96,7 +137,8 @@ function json(statusCode, obj) {
   };
 }
 
+// Échappe les caractères Markdown Telegram
 function safe(v) {
   if (v === null || v === undefined || v === "") return "—";
-  return String(v).replace(/[*_[\\]()~`>#+\\-=|{}.!]/g, "\\\\$&");
+  return String(v).replace(/[_*[\]()~`>#+\-=|{}.!]/g, "\\$&");
 }
