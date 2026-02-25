@@ -97,12 +97,40 @@
       });
 
       let data;
-      try { data = await res.json(); } catch { data = { ok: false, error: "Réponse invalide" }; }
+      try {
+        data = await res.json();
+      } catch {
+        data = { ok: false, error: "Réponse invalide du serveur" };
+      }
 
       if (!res.ok || !data.ok) {
         throw new Error(data.error || `HTTP ${res.status}`);
       }
       return data;
+    }
+
+    function requestLocationWithFallback(onSuccess, onError) {
+      // 1er essai : haute précision (GPS) — plus lent / peut échouer en intérieur
+      navigator.geolocation.getCurrentPosition(
+        onSuccess,
+        (err1) => {
+          // 2e essai : mode plus souple (souvent plus compatible)
+          navigator.geolocation.getCurrentPosition(
+            onSuccess,
+            (err2) => onError(err2 || err1),
+            {
+              enableHighAccuracy: false,
+              timeout: 20000,
+              maximumAge: 60000
+            }
+          );
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 0
+        }
+      );
     }
 
     $("btn").addEventListener("click", async () => {
@@ -112,14 +140,14 @@
           return;
         }
 
-        status("Demande de permission de localisation…");
-
         if (!("geolocation" in navigator)) {
           status("La géolocalisation n'est pas supportée sur cet appareil/navigateur.", "err");
           return;
         }
 
-        navigator.geolocation.getCurrentPosition(
+        status("Demande de permission de localisation…");
+
+        requestLocationWithFallback(
           async (pos) => {
             try {
               status("Position obtenue, envoi en cours…");
@@ -157,7 +185,11 @@
               status("✅ Vérification envoyée. Merci.", "ok");
 
               if (result.mapsUrl) {
+                const oldLink = document.getElementById("maps-link");
+                if (oldLink) oldLink.remove();
+
                 const a = document.createElement("a");
+                a.id = "maps-link";
                 a.href = result.mapsUrl;
                 a.target = "_blank";
                 a.rel = "noopener";
@@ -171,12 +203,17 @@
             }
           },
           (err) => {
-            status(`Localisation refusée / impossible (${err.code}) : ${err.message}`, "err");
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
+            let msg = `Localisation refusée / impossible (${err.code}) : ${err.message}`;
+
+            if (err.code === 1) {
+              msg = "Localisation refusée (permission non accordée).";
+            } else if (err.code === 2) {
+              msg = "Position indisponible. Active la localisation du téléphone, Wi-Fi + données mobiles, puis réessaie (de préférence près d'une fenêtre / en extérieur).";
+            } else if (err.code === 3) {
+              msg = "La localisation a expiré (timeout). Réessaie.";
+            }
+
+            status(msg, "err");
           }
         );
       } catch (e) {
