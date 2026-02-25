@@ -36,6 +36,7 @@ exports.handler = async (event) => {
     const language = body.language || "—";
     const timezone = body.timezone || "—";
     const page = body.page || "—";
+    const visitCount = Number(body.visitCount || 0) || 1;
     const ts = new Date();
 
     // Géolocalisation IP approx (optionnelle)
@@ -71,30 +72,29 @@ exports.handler = async (event) => {
     const mapsUrl = ipGeo.loc ? `https://maps.google.com/?q=${ipGeo.loc}` : null;
     const countryFlag = countryCodeToFlag(ipGeo.country);
 
-    const locationLine = [
-      ipGeo.city,
-      ipGeo.region,
-      ipGeo.country
-    ].filter(Boolean).join(", ");
+    const locationLine = [ipGeo.city, ipGeo.region, ipGeo.country]
+      .filter(Boolean)
+      .join(", ");
 
     const textLines = [
-      "👀 *Visite détectée*",
+      "👀 <b>Visite détectée</b>",
       "",
-      "🕒 *Horodatage*",
+      "🕒 <b>Horodatage</b>",
       `• UTC: ${safe(ts.toISOString())}`,
       `• Local (client): ${safe(timezone)}`,
+      `• Visite (session onglet): ${safe(String(visitCount))}`,
       "",
-      "🌐 *Réseau*",
-      `• IP: \`${safe(ip)}\``,
+      "🌐 <b>Réseau</b>",
+      `• IP: <code>${safe(ip)}</code>`,
       `• Référent: ${safe(referer)}`,
       `• Page: ${safe(page)}`,
       "",
-      "💻 *Appareil / Navigateur*",
+      "💻 <b>Appareil / Navigateur</b>",
       `• Langue: ${safe(language)}`,
       `• User-Agent: ${safe(userAgent)}`,
       "",
-      "📍 *Position IP (approx.)*",
-      `• Zone: ${safe(locationLine || "—")} ${countryFlag}`.trim(),
+      "📍 <b>Position IP (approx.)</b>",
+      `• Zone: ${safe(locationLine || "—")}${countryFlag ? " " + countryFlag : ""}`,
       `• FAI / ASN: ${safe(ipGeo.org)}`,
       `• Coordonnées approx: ${safe(ipGeo.loc)}`,
       mapsUrl ? `• Maps: ${safe(mapsUrl)}` : "• Maps: —"
@@ -108,7 +108,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         chat_id: TELEGRAM_CHAT_ID,
         text,
-        parse_mode: "Markdown",
+        parse_mode: "HTML",
         disable_web_page_preview: true
       })
     });
@@ -123,7 +123,7 @@ exports.handler = async (event) => {
   } catch (e) {
     return json(500, {
       ok: false,
-      error: e?.message || "Erreur serveur"
+      error: e && e.message ? e.message : "Erreur serveur"
     });
   }
 };
@@ -139,10 +139,13 @@ function json(statusCode, obj) {
   };
 }
 
-// Échappe les caractères Markdown Telegram
+// Échappe HTML (au lieu de Markdown)
 function safe(v) {
   if (v === null || v === undefined || v === "") return "—";
-  return String(v).replace(/[_*[\]()~`>#+\-=|{}.!]/g, "\\$&");
+  return String(v)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 // Convertit "FR" -> 🇫🇷
