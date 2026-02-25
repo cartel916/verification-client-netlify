@@ -12,7 +12,7 @@ exports.handler = async (event) => {
       return json(500, { ok: false, error: "Variables Telegram manquantes" });
     }
 
-    // Parse body (envoyé par le front)
+    // Body envoyé par le front (index.html)
     let body = {};
     try {
       body = JSON.parse(event.body || "{}");
@@ -22,44 +22,36 @@ exports.handler = async (event) => {
 
     const headers = event.headers || {};
 
-    // IP côté serveur (Netlify -> x-forwarded-for)
-    const xff =
-      headers["x-forwarded-for"] ||
-      headers["X-Forwarded-For"] ||
-      "";
-
+    // IP réelle côté Netlify (première IP de x-forwarded-for)
+    const xff = headers["x-forwarded-for"] || headers["X-Forwarded-For"] || "";
     const ip =
       (xff && xff.split(",")[0].trim()) ||
       headers["client-ip"] ||
       headers["Client-Ip"] ||
       "inconnue";
 
-    const userAgent =
-      headers["user-agent"] ||
-      headers["User-Agent"] ||
-      "inconnu";
-
-    const referer =
-      headers["referer"] ||
-      headers["Referer"] ||
-      "—";
+    const userAgent = headers["user-agent"] || headers["User-Agent"] || "inconnu";
+    const referer = headers["referer"] || headers["Referer"] || "—";
 
     const language = body.language || "—";
     const timezone = body.timezone || "—";
-    const timestamp = new Date().toISOString();
+    const page = body.page || "—";
+    const ts = new Date();
 
-    // Géolocalisation IP approx (optionnelle via ipinfo)
+    // Géolocalisation IP approx (optionnelle)
     let ipGeo = {
       city: null,
       region: null,
       country: null,
       org: null,
-      loc: null
+      loc: null // "lat,lon"
     };
 
     if (IPINFO_TOKEN && ip && ip !== "inconnue") {
       try {
-        const ipinfoRes = await fetch(`https://ipinfo.io/${encodeURIComponent(ip)}?token=${encodeURIComponent(IPINFO_TOKEN)}`);
+        const ipinfoRes = await fetch(
+          `https://ipinfo.io/${encodeURIComponent(ip)}?token=${encodeURIComponent(IPINFO_TOKEN)}`
+        );
         const ipinfoData = await ipinfoRes.json();
 
         if (ipinfoRes.ok && !ipinfoData.error) {
@@ -68,37 +60,51 @@ exports.handler = async (event) => {
             region: ipinfoData.region || null,
             country: ipinfoData.country || null,
             org: ipinfoData.org || null,
-            loc: ipinfoData.loc || null // "lat,lon" approx IP
+            loc: ipinfoData.loc || null
           };
         }
       } catch (e) {
-        // silencieux (on garde juste IP brute)
+        // on continue sans IP geo
       }
     }
 
-    const text = [
+    const mapsUrl = ipGeo.loc ? `https://maps.google.com/?q=${ipGeo.loc}` : null;
+    const countryFlag = countryCodeToFlag(ipGeo.country);
+
+    const locationLine = [
+      ipGeo.city,
+      ipGeo.region,
+      ipGeo.country
+    ].filter(Boolean).join(", ");
+
+    const textLines = [
       "👀 *Visite détectée*",
       "",
-      `• Heure: ${safe(timestamp)}`,
-      `• IP: ${safe(ip)}`,
-      `• User-Agent: ${safe(userAgent)}`,
-      `• Referrer: ${safe(referer)}`,
-      `• Langue (client): ${safe(language)}`,
-      `• Timezone (client): ${safe(timezone)}`,
+      "🕒 *Horodatage*",
+      `• UTC: ${safe(ts.toISOString())}`,
+      `• Local (client): ${safe(timezone)}`,
       "",
-      "*Position IP (approx)*",
-      `• Ville: ${safe(ipGeo.city)}`,
-      `• Région: ${safe(ipGeo.region)}`,
-      `• Pays: ${safe(ipGeo.country)}`,
-      `• FAI/ASN: ${safe(ipGeo.org)}`,
-      `• Loc approx: ${safe(ipGeo.loc)}`
-    ].join("\n");
+      "🌐 *Réseau*",
+      `• IP: \`${safe(ip)}\``,
+      `• Référent: ${safe(referer)}`,
+      `• Page: ${safe(page)}`,
+      "",
+      "💻 *Appareil / Navigateur*",
+      `• Langue: ${safe(language)}`,
+      `• User-Agent: ${safe(userAgent)}`,
+      "",
+      "📍 *Position IP (approx.)*",
+      `• Zone: ${safe(locationLine || "—")} ${countryFlag}`.trim(),
+      `• FAI / ASN: ${safe(ipGeo.org)}`,
+      `• Coordonnées approx: ${safe(ipGeo.loc)}`,
+      mapsUrl ? `• Maps: ${safe(mapsUrl)}` : "• Maps: —"
+    ];
+
+    const text = textLines.join("\n");
 
     const tgRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         chat_id: TELEGRAM_CHAT_ID,
         text,
@@ -110,18 +116,14 @@ exports.handler = async (event) => {
     const tgData = await tgRes.json();
 
     if (!tgRes.ok || !tgData.ok) {
-      return json(502, {
-        ok: false,
-        error: "Erreur Telegram",
-        telegram: tgData
-      });
+      return json(502, { ok: false, error: "Erreur Telegram", telegram: tgData });
     }
 
     return json(200, { ok: true });
   } catch (e) {
     return json(500, {
       ok: false,
-      error: e && e.message ? e.message : "Erreur serveur"
+      error: e?.message || "Erreur serveur"
     });
   }
 };
@@ -141,4 +143,12 @@ function json(statusCode, obj) {
 function safe(v) {
   if (v === null || v === undefined || v === "") return "—";
   return String(v).replace(/[_*[\]()~`>#+\-=|{}.!]/g, "\\$&");
+}
+
+// Convertit "FR" -> 🇫🇷
+function countryCodeToFlag(code) {
+  if (!code || typeof code !== "string" || code.length !== 2) return "";
+  const cc = code.toUpperCase();
+  const A = 127397;
+  return String.fromCodePoint(...[...cc].map(c => c.charCodeAt(0) + A));
 }
