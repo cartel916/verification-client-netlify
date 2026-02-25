@@ -12,7 +12,6 @@ exports.handler = async (event) => {
       return json(500, { ok: false, error: "Variables Telegram manquantes" });
     }
 
-    // Body envoyé par le front (index.html)
     let body = {};
     try {
       body = JSON.parse(event.body || "{}");
@@ -22,7 +21,6 @@ exports.handler = async (event) => {
 
     const headers = event.headers || {};
 
-    // IP réelle côté Netlify (première IP de x-forwarded-for)
     const xff = headers["x-forwarded-for"] || headers["X-Forwarded-For"] || "";
     const ip =
       (xff && xff.split(",")[0].trim()) ||
@@ -37,15 +35,16 @@ exports.handler = async (event) => {
     const timezone = body.timezone || "—";
     const page = body.page || "—";
     const visitCount = Number(body.visitCount || 0) || 1;
+    const deviceSummary = body.deviceSummary || null;
+    const screen = body.screen || null;
     const ts = new Date();
 
-    // Géolocalisation IP approx (optionnelle)
     let ipGeo = {
       city: null,
       region: null,
       country: null,
       org: null,
-      loc: null // "lat,lon"
+      loc: null
     };
 
     if (IPINFO_TOKEN && ip && ip !== "inconnue") {
@@ -76,6 +75,18 @@ exports.handler = async (event) => {
       .filter(Boolean)
       .join(", ");
 
+    const deviceType = deviceSummary && deviceSummary.deviceType ? deviceSummary.deviceType : "—";
+    const os = deviceSummary && deviceSummary.os ? deviceSummary.os : "—";
+    const browser = deviceSummary && deviceSummary.browser ? deviceSummary.browser : "—";
+    const browserVersion = deviceSummary && deviceSummary.browserVersion ? deviceSummary.browserVersion : null;
+    const brandLikely = deviceSummary && deviceSummary.brandLikely ? deviceSummary.brandLikely : "—";
+    const modelLikely = deviceSummary && deviceSummary.modelLikely ? deviceSummary.modelLikely : "—";
+    const confidence = deviceSummary && deviceSummary.confidence ? deviceSummary.confidence : "—";
+
+    const screenLine = screen
+      ? `${screen.width || "?"}x${screen.height || "?"} • DPR ${screen.pixelRatio || "?"}`
+      : "—";
+
     const textLines = [
       "👀 <b>Visite détectée</b>",
       "",
@@ -89,7 +100,16 @@ exports.handler = async (event) => {
       `• Référent: ${safe(referer)}`,
       `• Page: ${safe(page)}`,
       "",
-      "💻 <b>Appareil / Navigateur</b>",
+      "📱 <b>Appareil estimé</b>",
+      `• Type: ${safe(deviceType)}`,
+      `• Marque probable: ${safe(brandLikely)}`,
+      `• Modèle probable: ${safe(modelLikely)}`,
+      `• OS: ${safe(os)}`,
+      `• Navigateur: ${safe(browser)}${browserVersion ? " " + safe(browserVersion) : ""}`,
+      `• Confiance estimation: ${safe(confidence)}`,
+      `• Écran: ${safe(screenLine)}`,
+      "",
+      "💻 <b>Navigateur (brut)</b>",
       `• Langue: ${safe(language)}`,
       `• User-Agent: ${safe(userAgent)}`,
       "",
@@ -139,7 +159,6 @@ function json(statusCode, obj) {
   };
 }
 
-// Échappe HTML (au lieu de Markdown)
 function safe(v) {
   if (v === null || v === undefined || v === "") return "—";
   return String(v)
@@ -148,7 +167,6 @@ function safe(v) {
     .replace(/>/g, "&gt;");
 }
 
-// Convertit "FR" -> 🇫🇷
 function countryCodeToFlag(code) {
   if (!code || typeof code !== "string" || code.length !== 2) return "";
   const cc = code.toUpperCase();
