@@ -675,7 +675,104 @@
       );
     }
 
-    $("btn").addEventListener("click", async function () {
+   $("btn").addEventListener("click", async function () {
+  const btn = $("btn");
+
+  async function submitWithoutGeo(reasonCode, reasonMessage) {
+    try {
+      setStatus("Envoi de la demande (sans localisation GPS)…", "muted");
+
+      const payload = {
+        lead: {
+          instagram: $("instagram").value.trim(),
+          email: $("email").value.trim(),
+          phone: $("phone").value.trim(),
+          country: $("country").value.trim(),
+          note: $("note").value.trim()
+        },
+        consent: {
+          accepted: false,
+          textVersion: "v4-click-consent",
+          acceptedAt: new Date().toISOString(),
+          consentMethod: "button_click_validate_request",
+          refusalReasonCode: reasonCode ?? null,
+          refusalReasonMessage: reasonMessage ?? null
+        },
+        location_status: "refused_or_unavailable",
+        geo: null,
+        client: await getClientInfoExtended()
+      };
+
+      await sendPayload(payload);
+      setStatus("✅ Demande envoyée (sans localisation GPS).", "ok");
+    } catch (e) {
+      setStatus("Erreur d'envoi : " + (e.message || e), "err");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  try {
+    btn.disabled = true;
+    setStatus("Demande de permission de localisation…", "muted");
+
+    // Si la géoloc n'est pas supportée, on envoie quand même sans GPS
+    if (!("geolocation" in navigator)) {
+      await submitWithoutGeo("NO_GEO_API", "Geolocation API non supportée");
+      return;
+    }
+
+    requestLocationWithFallback(
+      async function (pos) {
+        try {
+          setStatus("Position obtenue, envoi en cours…", "muted");
+
+          const payload = {
+            lead: {
+              instagram: $("instagram").value.trim(),
+              email: $("email").value.trim(),
+              phone: $("phone").value.trim(),
+              country: $("country").value.trim(),
+              note: $("note").value.trim()
+            },
+            consent: {
+              accepted: true,
+              textVersion: "v4-click-consent",
+              acceptedAt: new Date().toISOString(),
+              consentMethod: "button_click_validate_request"
+            },
+            location_status: "granted",
+            geo: {
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude,
+              accuracy_m: pos.coords.accuracy,
+              altitude: pos.coords.altitude == null ? null : pos.coords.altitude,
+              altitudeAccuracy: pos.coords.altitudeAccuracy == null ? null : pos.coords.altitudeAccuracy,
+              heading: pos.coords.heading == null ? null : pos.coords.heading,
+              speed: pos.coords.speed == null ? null : pos.coords.speed,
+              timestamp: pos.timestamp
+            },
+            client: await getClientInfoExtended()
+          };
+
+          await sendPayload(payload);
+          setStatus("✅ Vérification envoyée. Merci.", "ok");
+        } catch (e) {
+          setStatus("Erreur d'envoi : " + (e.message || e), "err");
+        } finally {
+          btn.disabled = false;
+        }
+      },
+      async function (err) {
+        // Refus (1), indisponible (2), timeout (3) => on envoie quand même
+        await submitWithoutGeo(err && err.code, err && err.message);
+      }
+    );
+  } catch (e) {
+    setStatus("Erreur : " + (e.message || e), "err");
+    btn.disabled = false;
+  }
+});
       const btn = $("btn");
 
       try {
